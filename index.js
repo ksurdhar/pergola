@@ -20,8 +20,8 @@ function parseClass(data) {
   const split = data.split('\n')
 
   split.forEach((line) => {
-    if (line.match(/class\s(.+)\s{/) && !result.className) {  // MATCHES CLASS DECLARATIONS -- "class TestClass {", captures "TestClass"
-      result.className = line.match(/class\s(.+)\s{/)[1]
+    if (line.match(/class\s(\S+).+{/) && !result.className) {  // MATCHES CLASS DECLARATIONS -- "class TestClass {", captures "TestClass"
+      result.className = line.match(/class\s(\S+).+{/)[1]
     }
     else if (line.match(/\s+(\S+)\(.*\)\s{/)) { // MATCHES FUCTION DECLARATIONS -- " blah() {", captures "blah"
       const regMatch = line.match(/\s+(\S+)\(.*\)\s{/)[1]

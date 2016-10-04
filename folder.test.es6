@@ -1,6 +1,6 @@
-import Folder extends Base from './folder.es6' 
+import Folder from './folder.es6' 
 
-describe('Folder extends Base', () => {
+describe('Folder', () => {
   beforeEach(() => {
     // prep here
   })
