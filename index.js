@@ -1,7 +1,7 @@
-var fs = require('fs')
+const fs = require('fs')
 
-function saveFile(data) {
-  fs.writeFile('message.test.es6', data, (err) => {
+function saveFile(data, path) {
+  fs.writeFile('mcdonalds.test.es6', data, (err) => {
     if (err) throw err;
     console.log('It\'s saved!');
   });
@@ -12,21 +12,19 @@ function addImportStatement(className, filePath) {
 }
 
 function parseClass(data) {
-  var result = {
+  const result = {
     className: null,
     functionChunks: []
   }
 
-  var split = data.split('\n')
+  const split = data.split('\n')
 
   split.forEach((line) => {
-    if (line.match(/class\s(.+)\s{/) && !result.className) {  // MATCHES CLASS DECLARATIONS -- "class TestClass {", returns "TestClass"
+    if (line.match(/class\s(.+)\s{/) && !result.className) {  // MATCHES CLASS DECLARATIONS -- "class TestClass {", captures "TestClass"
       result.className = line.match(/class\s(.+)\s{/)[1]
     }
-    else if (line.match(/(.+\(\))\s{/)) { // MATCHES FUCTION DECLARATIONS -- " blah() {"
-      var regMatch = line.match(/(.+\(\))\s{/)[1]
-
-
+    else if (line.match(/\s*(.+)\(.*\)\s/)) { // MATCHES FUCTION DECLARATIONS -- " blah() {", captures "blah"
+      const regMatch = line.match(/\s*(.+)\(.*\)\s/)[1]
       result.functionChunks.push({ name: regMatch })
     }
   })
@@ -34,8 +32,8 @@ function parseClass(data) {
   return result
 }
 
-function buildBlocks(parsedClass) {
-  var chunkStrings = []
+function buildTestBlocks(parsedClass) {
+  const chunkStrings = []
 
   chunkStrings.push(`
 describe('${parsedClass.className}', () => {
@@ -46,7 +44,7 @@ describe('${parsedClass.className}', () => {
 
   parsedClass.functionChunks.forEach((chunk) => {
     chunkStrings.push(`
-  describe('${chunk.name}', () => {
+  describe('${chunk.name}()', () => {
     beforeEach(() => {
       // prep here
     })
@@ -63,16 +61,14 @@ describe('${parsedClass.className}', () => {
   return chunkStrings
 }
 
-fs.readFile('./test.es6', 'utf8', (err, data) => {
-  if (err) throw err;
-  var parsedClass = parseClass(data)
-  var blocks = buildBlocks(parsedClass)
-  blocks.unshift(addImportStatement(parsedClass.className, './test.es6'))
-  saveFile(blocks.join(''))
-});
+function generateTestFile(path) {
+  fs.readFile(path, 'utf8', (err, data) => {
+    if (err) throw err;
+    const parsedClass = parseClass(data)
+    const testBlocks = buildTestBlocks(parsedClass)
+    testBlocks.unshift(addImportStatement(parsedClass.className, path))
+    saveFile(testBlocks.join(''))
+  });
+}
 
-
-// take a file
-// read each line
-// parse for class, then search for function declarations
-// create a new file.test.es6
+generateTestFile(process.argv[2])
