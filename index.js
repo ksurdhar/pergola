@@ -1,7 +1,7 @@
 const fs = require('fs')
 
 function saveFile(data, path) {
-  fs.writeFile('mcdonalds.test.es6', data, (err) => {
+  fs.writeFile('folder.test.es6', data, (err) => {
     if (err) throw err;
     console.log('It\'s saved!');
   });
@@ -23,8 +23,8 @@ function parseClass(data) {
     if (line.match(/class\s(.+)\s{/) && !result.className) {  // MATCHES CLASS DECLARATIONS -- "class TestClass {", captures "TestClass"
       result.className = line.match(/class\s(.+)\s{/)[1]
     }
-    else if (line.match(/\s*(.+)\(.*\)\s/)) { // MATCHES FUCTION DECLARATIONS -- " blah() {", captures "blah"
-      const regMatch = line.match(/\s*(.+)\(.*\)\s/)[1]
+    else if (line.match(/\s+(\S+)\(.*\)\s{/)) { // MATCHES FUCTION DECLARATIONS -- " blah() {", captures "blah"
+      const regMatch = line.match(/\s+(\S+)\(.*\)\s{/)[1]
       result.functionChunks.push({ name: regMatch })
     }
   })
