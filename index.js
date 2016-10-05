@@ -11,7 +11,7 @@ function addImportStatement(className, filePath) {
   return `import ${className} from '${filePath}' \n`
 }
 
-function parseClass(data) {
+function parseClass(data, filePath) {
   const result = {
     className: null,
     functionChunks: []
@@ -20,10 +20,13 @@ function parseClass(data) {
   const split = data.split('\n')
 
   split.forEach((line) => {
-    if (line.match(/class\s(\S+).+{/) && !result.className) {                 // MATCHES CLASS DECLARATIONS -- "class TestClass {", captures "TestClass"
+    if (line.match(/class\s(\S+).+{/) && !result.className) {                 // MATCHES class TestClass {
       result.className = line.match(/class\s(\S+).+{/)[1]
     }
-    else if (line.match(/\s+(\S+)\(.*\)\s{/)) {                               // MATCHES " blah() {", captures "blah"
+    else if (line.match(/import angular/) && !result.className) {
+      result.className = filePath.match(/\/(\w+).es6/)[1]                     // MATCHES ./somePath/components/someFile.es6
+    }
+    else if (line.match(/\s+(\S+)\(.*\)\s{/)) {                               // MATCHES sampleFunction() {
       const regMatch = line.match(/\s+(\S+)\(.*\)\s{/)[1]
       result.functionChunks.push({ name: regMatch })
     }
@@ -35,7 +38,7 @@ function parseClass(data) {
       const regMatch = line.match(/\S+\.(\w+)\s?=\s?function\(.*\)\s?{/)[1]
       result.functionChunks.push({ name: regMatch })
     }
-    else if (line.match(/(\S+):\s?function\(.*\)\s?{/)) {                     // MATCHES anyString: function(some, args) {
+    else if (line.match(/(\S+):\s?function\(.*\)\s?{/)) {                     // MATCHES sampleFunction: function(some, args) {
       const regMatch = line.match(/(\S+):\s?function\(.*\)\s?{/)[1]
       result.functionChunks.push({ name: regMatch })
     }
@@ -77,7 +80,7 @@ describe('${parsedClass.className}', () => {
 function generateTestFile(path) {
   fs.readFile(path, 'utf8', (err, data) => {
     if (err) throw err;
-    const parsedClass = parseClass(data)
+    const parsedClass = parseClass(data, path)
     const testBlocks = buildTestBlocks(parsedClass)
     testBlocks.unshift(addImportStatement(parsedClass.className, path))
     saveFile(testBlocks.join(''))
