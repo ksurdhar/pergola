@@ -1,3 +1,4 @@
+"use strict"
 const fs = require('fs')
 
 const CLASS_REGEX = /class\s(\S+).+{/                            // MATCHES class TestClass {
@@ -17,9 +18,9 @@ function parseClass(data, filePath) {
     functionChunks: []
   }
 
-  const split = data.split('\n')
+  const fileLines = data.split('\n')
 
-  split.forEach((line) => {
+  fileLines.forEach((line) => {
     if (line.match(CLASS_REGEX) && !result.className) {
       result.className = line.match(CLASS_REGEX)[1]
     }
@@ -100,9 +101,9 @@ function findExistingFunctions(data) {
   const functions = []
   const DESCRIBE_FUNCTION = /['\s](\S+)\(\)/ // MATCHES sampleFunction()
 
-  const split = data.split('\n')
+  const fileLines = data.split('\n')
 
-  split.forEach((line) => {
+  fileLines.forEach((line) => {
     // remove the indentation whitespace
     line = line.split(',')[0]
     line = line.replace(/ /g, "")
@@ -114,16 +115,38 @@ function findExistingFunctions(data) {
   return functions
 }
 
+function findParentFilePath(data, testFilePath) {
+  const rootFileName = testFilePath.match(/(\w+).test/)[1] // MATCHES common/sampleFile.test.es6 --> sampleFile
+  let importStatement = null
+
+  const fileLines = data.split('\n')
+
+  fileLines.forEach((line) => {
+    if (line.match(rootFileName) && !importStatement) {
+      importStatement = line
+    }
+  })
+
+  let parentFilePath = importStatement.match(/\'(\S*)\'/)[0].slice(1,-1) // regex was catching quotations
+  parentFilePath = `src/${parentFilePath}.es6`
+
+  return parentFilePath
+}
+
 function readTestFile(path) {
   fs.readFile(path, 'utf8', (err, data) => {
     if (err) throw err;
-    findExistingFunctions(data)
-    // findParentFilePath()
-    //
-    // const parsedClass = parseClass(data, path)
-    // const testBlocks = buildTestBlocks(parsedClass)
-    // testBlocks.unshift(addImportStatement(parsedClass.className, path))
-    // saveFile(testBlocks.join(''), path)
+    const existingFunctions = findExistingFunctions(data)
+    const parentFilePath = findParentFilePath(data, path)
+
+    fs.readFile(parentFilePath, 'utf8', (err, parentData) => {
+      if (err) throw err;
+      console.log('we found the class!')
+      // const parsedClass = parseClass(parentData, parentFilePath)
+      // compare parsedClass.functionChunks with existingFunctions
+      // for each of the remaining functions, call buildTestBlocks, but only for functions
+      // append at the bottom of the OG test data, save the file
+    });
   });
 }
 
