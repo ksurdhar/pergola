@@ -96,4 +96,59 @@ function generateTestFile(path) {
   });
 }
 
-generateTestFile(process.argv[2])
+function findExistingFunctions(data) {
+  const functions = []
+  const DESCRIBE_FUNCTION = /['\s](\S+)\(\)/ // MATCHES sampleFunction()
+
+  const split = data.split('\n')
+
+  split.forEach((line) => {
+    // remove the indentation whitespace
+    line = line.split(',')[0]
+    line = line.replace(/ /g, "")
+
+    if (line.match(/describe/) && line.match(DESCRIBE_FUNCTION)) {
+      functions.push(line.match(DESCRIBE_FUNCTION)[1])
+    }
+  })
+  return functions
+}
+
+function readTestFile(path) {
+  fs.readFile(path, 'utf8', (err, data) => {
+    if (err) throw err;
+    findExistingFunctions(data)
+    // findParentFilePath()
+    //
+    // const parsedClass = parseClass(data, path)
+    // const testBlocks = buildTestBlocks(parsedClass)
+    // testBlocks.unshift(addImportStatement(parsedClass.className, path))
+    // saveFile(testBlocks.join(''), path)
+  });
+}
+
+// generateTestFile(process.argv[2])
+readTestFile(process.argv[2])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
