@@ -46,15 +46,16 @@ function parseClass(data, filePath) {
 
 function buildFunctionTestBlock(func) {
     return `
-describe('${func}()', () => {
-  beforeEach(() => {
-    // prep here
-  })
+  describe('${func}()', () => {
+    beforeEach(() => {
+      // prep here
+    })
 
-  it('does something', () => {
-    expect()
+    it('does something', () => {
+      expect()
+    })
   })
-})`
+`
 }
 
 function buildTestBlocks(parsedClass) {
@@ -148,7 +149,6 @@ function readTestFile(path) {
       const parsedClass = parseClass(parentData, parentFilePath)
 
       parsedClass.functionChunks.forEach((funcChunk) => {
-        console.log(funcChunk.name)
         if (existingFunctions.indexOf(funcChunk.name) === -1) {
           untestedFunctions.push(funcChunk)
         }
@@ -156,9 +156,12 @@ function readTestFile(path) {
 
       console.log('UNTESTED FUNCTIONS:', untestedFunctions)
       if (untestedFunctions.length > 0) {
+        const funcBlocks = []
         untestedFunctions.forEach((func) => {
-
+          funcBlocks.push(buildFunctionTestBlock(func.name))
         })
+        parentLines = parentData.split('\n')
+        //join them, add them to the bottom of the file
       }
       else {
         console.log('No untested functions. You\'re a baller.')
@@ -167,8 +170,8 @@ function readTestFile(path) {
   });
 }
 
-// generateTestFile(process.argv[2])
-readTestFile(process.argv[2])
+generateTestFile(process.argv[2])
+// readTestFile(process.argv[2])
 
 
 
