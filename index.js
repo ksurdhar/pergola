@@ -44,6 +44,19 @@ function parseClass(data, filePath) {
   return result
 }
 
+function buildFunctionTestBlock(func) {
+    return `
+describe('${func}()', () => {
+  beforeEach(() => {
+    // prep here
+  })
+
+  it('does something', () => {
+    expect()
+  })
+})`
+}
+
 function buildTestBlocks(parsedClass) {
   const chunkStrings = []
 
@@ -55,17 +68,7 @@ describe('${parsedClass.className}', () => {
 `)
 
   parsedClass.functionChunks.forEach((chunk) => {
-    chunkStrings.push(`
-  describe('${chunk.name}()', () => {
-    beforeEach(() => {
-      // prep here
-    })
-
-    it('does something', () => {
-      expect()
-    })
-  })
-`)
+    chunkStrings.push(buildFunctionTestBlock(chunk.name))
   })
 
   chunkStrings.push('})')
@@ -78,7 +81,7 @@ function addImportStatement(className, filePath) {
 }
 
 function saveFile(data, path) {
-  const fileName = path.match(FILE_REGEX)[1]
+  let fileName = path.match(FILE_REGEX)[1]
   fileName = fileName.slice(0, -4)
 
   fs.writeFile(`${fileName}.test.es6`, data, (err) => {
@@ -127,7 +130,7 @@ function findParentFilePath(data, testFilePath) {
     }
   })
 
-  let parentFilePath = importStatement.match(/\'(\S*)\'/)[0].slice(1,-1) // regex was catching quotations
+  let parentFilePath = importStatement.match(/\'(\S*)\'/)[0].slice(1, -1) // regex was catching quotations
   parentFilePath = `src/${parentFilePath}.es6`
 
   return parentFilePath
@@ -141,11 +144,25 @@ function readTestFile(path) {
 
     fs.readFile(parentFilePath, 'utf8', (err, parentData) => {
       if (err) throw err;
-      console.log('we found the class!')
-      // const parsedClass = parseClass(parentData, parentFilePath)
-      // compare parsedClass.functionChunks with existingFunctions
-      // for each of the remaining functions, call buildTestBlocks, but only for functions
-      // append at the bottom of the OG test data, save the file
+      const untestedFunctions = []
+      const parsedClass = parseClass(parentData, parentFilePath)
+
+      parsedClass.functionChunks.forEach((funcChunk) => {
+        console.log(funcChunk.name)
+        if (existingFunctions.indexOf(funcChunk.name) === -1) {
+          untestedFunctions.push(funcChunk)
+        }
+      })
+
+      console.log('UNTESTED FUNCTIONS:', untestedFunctions)
+      if (untestedFunctions.length > 0) {
+        untestedFunctions.forEach((func) => {
+
+        })
+      }
+      else {
+        console.log('No untested functions. You\'re a baller.')
+      }
     });
   });
 }
