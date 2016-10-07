@@ -34,10 +34,6 @@ class Region extends Base {
     this.fullAddress = address
   }
 
-  burnThisMothaFucka() {
-    
-  }
-
   markViewed() {
     return Base.socket(this._appendID({
       _type: 'Region.viewed',

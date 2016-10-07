@@ -101,6 +101,7 @@ function generateTestFile(path) {
   });
 }
 
+// Returns an array of functions that already have tests written
 function findExistingFunctions(data) {
   const functions = []
   const DESCRIBE_FUNCTION = /['\s](\S+)\(\)/ // MATCHES sampleFunction()
@@ -119,6 +120,7 @@ function findExistingFunctions(data) {
   return functions
 }
 
+// Finds the root of the test file name and infers the path of the parent
 function findParentFilePath(data, testFilePath) {
   const rootFileName = testFilePath.match(/(\w+).test/)[1] // MATCHES common/sampleFile.test.es6 --> sampleFile
   let importStatement = null
@@ -137,7 +139,38 @@ function findParentFilePath(data, testFilePath) {
   return parentFilePath
 }
 
-function readTestFile(path) {
+// Diffs class functions with a test file's functions and returns
+// an array of any untested functions
+function findUntestedFunctions(existingFunctions, parentData, parentFilePath) {
+  const untestedFunctions = []
+  const parsedClass = parseClass(parentData, parentFilePath)
+
+  parsedClass.functionChunks.forEach((funcChunk) => {
+    if (existingFunctions.indexOf(funcChunk.name) === -1) {
+      untestedFunctions.push(funcChunk)
+    }
+  })
+
+  console.log('UNTESTED FUNCTIONS:', untestedFunctions)
+  return untestedFunctions
+}
+
+// Takes an array of objects { name: 'someFunc'} and appends test blocks
+// to the bottom of a test file
+function addBlocksToTestFile(untestedFunctions, data) {
+  const funcBlocks = []
+  untestedFunctions.forEach((func) => {
+    funcBlocks.push(buildFunctionTestBlock(func.name))
+  })
+  const newTestBlockLines = funcBlocks.join().split('\n')
+  const testLines = data.split('\n')
+
+  return testLines.slice(0, testLines.length - 2).concat(newTestBlockLines).concat(testLines.slice(testLines.length - 2))
+}
+
+// Diffs the existing functions tested in a given test file with all the functions
+// found in a class and adds test boilerplate for any untested functions
+function updateTestFile(path) {
   fs.readFile(path, 'utf8', (err, data) => {
     if (err) throw err;
     const existingFunctions = findExistingFunctions(data)
@@ -145,53 +178,27 @@ function readTestFile(path) {
 
     fs.readFile(parentFilePath, 'utf8', (err, parentData) => {
       if (err) throw err;
-      const untestedFunctions = []
-      const parsedClass = parseClass(parentData, parentFilePath)
+      const untestedFunctions = findUntestedFunctions(existingFunctions, parentData, parentFilePath)
 
-      parsedClass.functionChunks.forEach((funcChunk) => {
-        if (existingFunctions.indexOf(funcChunk.name) === -1) {
-          untestedFunctions.push(funcChunk)
-        }
-      })
-
-      console.log('UNTESTED FUNCTIONS:', untestedFunctions)
       if (untestedFunctions.length > 0) {
-        const funcBlocks = []
-        untestedFunctions.forEach((func) => {
-          funcBlocks.push(buildFunctionTestBlock(func.name))
-        })
-        parentLines = parentData.split('\n')
-        //join them, add them to the bottom of the file
+        const augmentedTestFile = addBlocksToTestFile(untestedFunctions, data)
+        saveFile(augmentedTestFile.join('\n'), parentFilePath)
       }
       else {
-        console.log('No untested functions. You\'re a baller.')
+        console.log('No untested functions detected. You\'re a baller.')
       }
     });
   });
 }
 
-generateTestFile(process.argv[2])
-// readTestFile(process.argv[2])
+// Determines whether to create a test file or supplement an existing one
+function determineFileType(path) {
+  if (path.match(/\.test\.es6/)) {
+    updateTestFile(path)
+  }
+  else {
+    generateTestFile(path)
+  }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
+determineFileType(process.argv[2])
