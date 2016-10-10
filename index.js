@@ -177,11 +177,11 @@ function addBlocksToTestFile(untestedFunctions, data) {
 
 // Diffs the existing funcs tested in a given test file with all the funcs
 // found in a class and adds test boilerplate for the untested funcs
-function updateTestFile(path) {
-  fs.readFile(path, 'utf8', (err, data) => {
+function updateTestFile(testFilePath) {
+  fs.readFile(testFilePath, 'utf8', (err, data) => {
     if (err) throw err;
     const existingFunctions = findExistingFunctions(data)
-    const parentFilePath = findParentFilePath(data, path)
+    const parentFilePath = findParentFilePath(data, testFilePath)
 
     fs.readFile(parentFilePath, 'utf8', (err, parentData) => {
       if (err) throw err;
@@ -189,7 +189,7 @@ function updateTestFile(path) {
 
       if (untestedFunctions.length > 0) {
         const augmentedTestFile = addBlocksToTestFile(untestedFunctions, data)
-        saveExistingFile(augmentedTestFile.join('\n'), parentFilePath)
+        saveExistingFile(augmentedTestFile.join('\n'), testFilePath)
       }
       else {
         console.log('No untested functions detected!')
