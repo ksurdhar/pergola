@@ -9,7 +9,7 @@ const ARROW_FUNC_REGEX = /\S+\.(\w+)\s?=\s?\(.*\)\s?=>\s?{/      // MATCHES this
 const OBJ_FUNC_REGEX = /(\S+):\s?function\(.*\)\s?{/             // MATCHES sampleFunction: function(some, args) {
 
 function notBlacklisted(lineData) {
-  return !lineData.match(/if|then|angular.module|\$on|\$eval|\$apply|\[\]|subscribe/)
+  return !lineData.match(/if|then|\[\]|\./)
 }
 
 function parseClass(data, filePath) {
@@ -101,7 +101,7 @@ function generateTestFile(path) {
   });
 }
 
-// Returns an array of functions that already have tests written
+// Returns an array of funcs that already have tests written
 function findExistingFunctions(data) {
   const functions = []
   const DESCRIBE_FUNCTION = /['\s](\S+)\(\)/ // MATCHES sampleFunction()
@@ -109,9 +109,8 @@ function findExistingFunctions(data) {
   const fileLines = data.split('\n')
 
   fileLines.forEach((line) => {
-    // remove the indentation whitespace
-    line = line.split(',')[0]
-    line = line.replace(/ /g, "")
+    line = line.split(',')[0]     // only check before the comma
+    line = line.replace(/ /g, "") // remove the indentation whitespace
 
     if (line.match(/describe/) && line.match(DESCRIBE_FUNCTION)) {
       functions.push(line.match(DESCRIBE_FUNCTION)[1])
@@ -120,7 +119,7 @@ function findExistingFunctions(data) {
   return functions
 }
 
-// Finds the root of the test file name and infers the path of the parent
+// Infers the path of a parent file by using the root of a test file's name
 function findParentFilePath(data, testFilePath) {
   const rootFileName = testFilePath.match(/(\w+).test/)[1] // MATCHES common/sampleFile.test.es6 --> sampleFile
   let importStatement = null
@@ -139,8 +138,8 @@ function findParentFilePath(data, testFilePath) {
   return parentFilePath
 }
 
-// Diffs class functions with a test file's functions and returns
-// an array of any untested functions
+// Diffs funcs in a file against funcs in a test file and returns
+// an array of the names of the untested funcs
 function findUntestedFunctions(existingFunctions, parentData, parentFilePath) {
   const untestedFunctions = []
   const parsedClass = parseClass(parentData, parentFilePath)
@@ -155,7 +154,7 @@ function findUntestedFunctions(existingFunctions, parentData, parentFilePath) {
   return untestedFunctions
 }
 
-// Takes an array of objects { name: 'someFunc'} and appends test blocks
+// Takes an array of objects { name: 'someFunc'} and appends describe blocks
 // to the bottom of a test file
 function addBlocksToTestFile(untestedFunctions, data) {
   const funcBlocks = []
@@ -168,8 +167,8 @@ function addBlocksToTestFile(untestedFunctions, data) {
   return testLines.slice(0, testLines.length - 2).concat(newTestBlockLines).concat(testLines.slice(testLines.length - 2))
 }
 
-// Diffs the existing functions tested in a given test file with all the functions
-// found in a class and adds test boilerplate for any untested functions
+// Diffs the existing funcs tested in a given test file with all the funcs
+// found in a class and adds test boilerplate for the untested funcs
 function updateTestFile(path) {
   fs.readFile(path, 'utf8', (err, data) => {
     if (err) throw err;
@@ -185,7 +184,7 @@ function updateTestFile(path) {
         saveFile(augmentedTestFile.join('\n'), parentFilePath)
       }
       else {
-        console.log('No untested functions detected. You\'re a baller.')
+        console.log('No untested functions detected!')
       }
     });
   });
