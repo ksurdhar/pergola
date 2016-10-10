@@ -26,6 +26,14 @@ class Region extends Base {
     })
   }
 
+  foo() {
+
+  }
+
+  barbutter() {
+
+  }
+
   getFullAddress() {
     return this.fullAddress
   }
