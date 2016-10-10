@@ -92,6 +92,13 @@ function saveFile(data, path) {
   });
 }
 
+function saveExistingFile(data, path) {
+  fs.writeFile(path, data, (err) => {
+    if (err) throw err;
+    console.log('Test file has been updated!');
+  });
+}
+
 function generateTestFile(path) {
   fs.readFile(path, 'utf8', (err, data) => {
     if (err) throw err;
@@ -182,7 +189,7 @@ function updateTestFile(path) {
 
       if (untestedFunctions.length > 0) {
         const augmentedTestFile = addBlocksToTestFile(untestedFunctions, data)
-        saveFile(augmentedTestFile.join('\n'), parentFilePath)
+        saveExistingFile(augmentedTestFile.join('\n'), parentFilePath)
       }
       else {
         console.log('No untested functions detected!')

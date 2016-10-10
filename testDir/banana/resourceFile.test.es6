@@ -124,15 +124,4 @@ describe('Region', () => {
       expect()
     })
   })
-
-  describe('blahblah()', () => {
-    beforeEach(() => {
-      // prep here
-    })
-
-    it('does something', () => {
-      expect()
-    })
-  })
-
 })
