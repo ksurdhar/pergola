@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 "use strict"
 const fs = require('fs')
 
@@ -83,7 +85,6 @@ function addImportStatement(className, filePath) {
 
 function saveFile(data, path) {
   let fileName = path.match(FILE_REGEX)[1]
-  fileName = fileName.slice(0, -4)
 
   fs.writeFile(`${fileName}.test.es6`, data, (err) => {
     if (err) throw err;

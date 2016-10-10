@@ -1,0 +1,18 @@
+{
+  "name": "pergola-beta",
+  "version": "1.0.0",
+  "description": "pergola testing tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ksurdhar/pergola.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bin": {
+    "pergola-beta": "./index.js"
+  }
+}

@@ -28,7 +28,7 @@ Pergola uses a series of regexes to infer what functions need tests. If your fun
  sampleFunction: function(some, args) {
 ```
 
-#### 
+#### Test File Formats
 #### File Path Inference
 
 ### About
