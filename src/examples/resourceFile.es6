@@ -40,6 +40,10 @@ class Region extends Base {
     }))
   }
 
+  testFgunc() {
+    
+  }
+
   splatIntoSheet(sheetID, rangeString) {
     const req = {
       _type: 'SheetEdit.splat',
@@ -86,7 +90,6 @@ class Region extends Base {
 
     return Base.socket(this._appendID(req))
   }
-
 }
 
 Object.defineProperty(Region.prototype, 'ranges', {

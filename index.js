@@ -80,7 +80,8 @@ describe('${parsedClass.className}', () => {
 }
 
 function addImportStatement(className, filePath) {
-  return `import ${className} from '${filePath}' \n`
+  const extensionlessPath = filePath.match(/src\/(.*)\.es6/)[1]
+  return `import ${className} from '${extensionlessPath}' \n`
 }
 
 function saveFile(data, path) {
@@ -169,7 +170,7 @@ function addBlocksToTestFile(untestedFunctions, data) {
   untestedFunctions.forEach((func) => {
     funcBlocks.push(buildFunctionTestBlock(func.name))
   })
-  const newTestBlockLines = funcBlocks.join().split('\n')
+  const newTestBlockLines = funcBlocks.join('').split('\n')
   const testLines = data.split('\n')
 
   return testLines.slice(0, testLines.length - 2).concat(newTestBlockLines).concat(testLines.slice(testLines.length - 2))
